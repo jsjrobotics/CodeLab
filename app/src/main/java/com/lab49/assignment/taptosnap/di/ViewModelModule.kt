@@ -17,10 +17,5 @@ class ViewModelModule {
     fun provideLabelRepository(impl: LabelsRepositoryImpl): LabelsRepository {
         return impl
     }
-    @Provides
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
-
-    @Provides
-    fun provideGsonConverterFactory() = GsonConverterFactory.create()
 
 }

@@ -30,7 +30,7 @@
         app:layout_constraintGuide_percent=".75"/>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/icon"
+        android:id="@+id/button_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/lets_go"
