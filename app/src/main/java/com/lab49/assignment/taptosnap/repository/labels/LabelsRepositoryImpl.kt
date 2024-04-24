@@ -5,14 +5,13 @@ import com.lab49.assignment.taptosnap.network.BackendApi
 import com.lab49.assignment.taptosnap.network.NetworkHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import javax.inject.Inject
 
 class LabelsRepositoryImpl @Inject constructor(private val offlineSource: LabelsOfflineSource,
                                                private val api: BackendApi,
     private val networkHelper: NetworkHelper
 ) : LabelsRepository {
-    private val onlineLabelsFlow = MutableStateFlow<Set<String>>(emptySet())
+    private val _onlineLabelsFlow = MutableStateFlow<Set<String>>(emptySet())
 
     override suspend fun fetchLabels(): Boolean {
         if (networkHelper.isOnline()) {
@@ -31,7 +30,7 @@ class LabelsRepositoryImpl @Inject constructor(private val offlineSource: Labels
         receivedLabels?.let {
             val labels = it.toSet()
             setLabels(labels)
-            onlineLabelsFlow.emit(labels)
+            _onlineLabelsFlow.emit(labels)
         }
     }
 
@@ -41,7 +40,7 @@ class LabelsRepositoryImpl @Inject constructor(private val offlineSource: Labels
     }
 
     override fun observeLabels(): Flow<Set<String>> {
-       return onlineLabelsFlow
+       return _onlineLabelsFlow
     }
 
     override fun setLabels(values: Set<String>?) {

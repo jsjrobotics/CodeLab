@@ -9,9 +9,7 @@ interface LabelsRepository {
     suspend fun fetchLabels(): Boolean
 
     fun setLabels(values: Set<String>?)
-    fun observeLabels(): Flow<Set<String>> {
-        return emptyFlow()
-    }
+    fun observeLabels(): Flow<Set<String>>
 
     // Retrieve previously saved label values
     fun loadLabels(): Set<String>?

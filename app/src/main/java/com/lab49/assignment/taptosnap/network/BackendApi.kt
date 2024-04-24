@@ -27,8 +27,12 @@ class BackendApi @Inject constructor(
     fun asyncFetchLabels(): ApiLabelsResponse? {
         val call = apiInterface.getLabels()
         if (networkHelper.isOnline()) {
-            val httpResult = call.execute()
-            return httpResult.body()
+            return try {
+                val httpResult = call.execute()
+                httpResult.body()
+            } catch (exception: Exception) {
+                null
+            }
         }
         return null
     }
