@@ -9,7 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,8 +22,8 @@ class SplashViewModel @Inject constructor(
 ): ViewModel() {
     private val viewModelJob = SupervisorJob()
     private val networkScope = CoroutineScope(Dispatchers.IO + viewModelJob)
-    private val _labelsLoaded = MutableStateFlow<Boolean>(false)
-    val labelsLoaded : StateFlow<Boolean> = _labelsLoaded
+    private val _labelsLoaded = MutableStateFlow(false)
+    val labelsLoaded = _labelsLoaded.asStateFlow()
 
     override fun onCleared() {
         super.onCleared()
@@ -37,10 +39,12 @@ class SplashViewModel @Inject constructor(
         if (networkHelper.isOnline()) {
             networkScope.launch {
                 labelsRepository.fetchLabels()
-                labelsRepository.observeLabels().collect { updatedLabels ->
-                    println("Received labels: $updatedLabels")
-                    _labelsLoaded.value = true
-                }
+                labelsRepository.observeLabels()
+                    .take(1)
+                    .collect { updatedLabels ->
+                        println("Received labels: $updatedLabels")
+                        _labelsLoaded.value = true
+                    }
             }
             return true
         }

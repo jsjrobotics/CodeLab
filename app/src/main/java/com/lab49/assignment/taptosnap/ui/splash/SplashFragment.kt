@@ -14,6 +14,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+/**
+ * The splash fragment subscribes to its view model to observe changes regarding whether labels
+ * are loaded or not. If they are loaded, enable the Start button. If not loaded, disable Start button.
+ */
 @AndroidEntryPoint
 class SplashFragment: Fragment(R.layout.fragment_splash) {
     private val viewModel by viewModels<SplashViewModel>()
@@ -22,7 +26,7 @@ class SplashFragment: Fragment(R.layout.fragment_splash) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentSplashBinding.bind(view)
         buttonStart = binding.buttonStart
-        buttonStart.setOnClickListener{
+        buttonStart.setOnClickListener {
             // Navigate away
         }
         lifecycleScope.launch {

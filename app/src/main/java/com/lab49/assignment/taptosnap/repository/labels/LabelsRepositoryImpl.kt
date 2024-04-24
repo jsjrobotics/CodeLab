@@ -5,33 +5,20 @@ import com.lab49.assignment.taptosnap.network.BackendApi
 import com.lab49.assignment.taptosnap.network.NetworkHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import javax.inject.Inject
 
 class LabelsRepositoryImpl @Inject constructor(private val offlineSource: LabelsOfflineSource,
-                                               private val api: BackendApi,
-    private val networkHelper: NetworkHelper
-) : LabelsRepository {
-    private val _onlineLabelsFlow = MutableStateFlow<Set<String>>(emptySet())
+                                               private val onlineSource: LabelsOnlineSource,
+    ) : LabelsRepository {
 
     override suspend fun fetchLabels(): Boolean {
-        if (networkHelper.isOnline()) {
-            val response = api.asyncFetchLabels()
-            if (response?.data != null) {
-                processLabelResponse(response.data)
-                return true
-            }
-            return false
+        val updated = onlineSource.downloadLabels()
+        if (updated) {
+            observeLabels().take(1).collect (::setLabels)
         }
-        return false
-    }
-
-    private suspend fun processLabelResponse(data: List<ImageLabel>?) {
-        val receivedLabels = data?.map { it.imageLabel }
-        receivedLabels?.let {
-            val labels = it.toSet()
-            setLabels(labels)
-            _onlineLabelsFlow.emit(labels)
-        }
+        return updated
     }
 
     // Return the saved labels if they exist, null otherwise
@@ -40,10 +27,11 @@ class LabelsRepositoryImpl @Inject constructor(private val offlineSource: Labels
     }
 
     override fun observeLabels(): Flow<Set<String>> {
-       return _onlineLabelsFlow
+       return onlineSource.onlineLabelsFlow
     }
 
     override fun setLabels(values: Set<String>?) {
+        println("Saving labels $values")
         offlineSource.setLabels(values)
     }
 }
