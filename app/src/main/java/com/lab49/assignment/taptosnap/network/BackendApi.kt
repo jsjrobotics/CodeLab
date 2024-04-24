@@ -1,9 +1,6 @@
 package com.lab49.assignment.taptosnap.network
 
 import com.lab49.assignment.taptosnap.dataStructures.ApiLabelsResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

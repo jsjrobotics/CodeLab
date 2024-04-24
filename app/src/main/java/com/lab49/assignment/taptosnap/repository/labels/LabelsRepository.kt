@@ -1,7 +1,6 @@
 package com.lab49.assignment.taptosnap.repository.labels
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 interface LabelsRepository {
     // Return true if a network call is being made, false otherwise.

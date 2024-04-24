@@ -1,9 +1,5 @@
 package com.lab49.assignment.taptosnap.ui.splash
 
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lab49.assignment.taptosnap.network.NetworkHelper
 import com.lab49.assignment.taptosnap.repository.labels.LabelsRepository
