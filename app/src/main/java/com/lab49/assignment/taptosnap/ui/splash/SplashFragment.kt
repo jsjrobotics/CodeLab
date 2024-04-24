@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +28,8 @@ class SplashFragment: Fragment(R.layout.fragment_splash) {
         val binding = FragmentSplashBinding.bind(view)
         buttonStart = binding.buttonStart
         buttonStart.setOnClickListener {
-            // Navigate away
+            val navController = findNavController()
+            navController.navigate(R.id.action_splashFragment_to_gameFragment)
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
