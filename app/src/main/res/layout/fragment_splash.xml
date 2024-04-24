@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".25"/>
+
+    <ImageView
+        android:id="@+id/welcome_to"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_210"
+        android:gravity="center_horizontal"
+        android:src="@drawable/logo"
+        android:fontFamily="@font/karla_regular"
+        android:textStyle="italic"
+        app:layout_constraintTop_toBottomOf="@id/guideline_header"
+        android:contentDescription="@string/content_description_splash" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_start_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".75"/>
+
+    <TextView
+        android:id="@+id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lets_go"
+        android:background="@drawable/button_start"
+        android:textColor="@color/white"
+        android:gravity="center_horizontal"
+        android:layout_marginLeft="@dimen/dp_50"
+        android:layout_marginRight="@dimen/dp_50"
+        android:padding="@dimen/dp_10"
+        android:textSize="@dimen/sp_24"
+        android:fontFamily="@font/karla_bold"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/guideline_start_button"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
