@@ -2,7 +2,38 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/bg_gray">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".05"/>
+    <TextView
+        android:id="@+id/header_tap_to_snap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textColor="@color/white"
+        android:text="@string/tap_to_snap"
+        android:textSize="@dimen/sp_24"
+        app:layout_constraintTop_toBottomOf="@id/guideline_header" />
+    <GridView
+        android:id="@+id/tasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/header_tap_to_snap"
+        app:layout_constraintBottom_toTopOf="@id/countdown"/>
+
+    <TextView
+        android:id="@+id/countdown"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_175"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:textSize="@dimen/sp_48"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
