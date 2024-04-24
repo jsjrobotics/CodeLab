@@ -7,6 +7,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SplashFragment: Fragment(R.layout.fragment_splash) {
-    val viewModel by viewModels<SplashViewModel>()
+    private val viewModel by viewModels<SplashViewModel>()
 
+    override fun onStart() {
+        super.onStart()
+    }
 }
