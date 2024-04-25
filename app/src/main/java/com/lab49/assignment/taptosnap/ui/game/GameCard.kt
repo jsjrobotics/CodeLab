@@ -1,21 +1,23 @@
 package com.lab49.assignment.taptosnap.ui.game
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidState
+import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
 import com.lab49.assignment.taptosnap.databinding.CardGameBinding
 
 
 class GameCard(view: View) : RecyclerView.ViewHolder(view){
+    private var validatingProgress: ProgressBar
     private var container: ConstraintLayout
     private var cameraImage: ImageView
     private var labelDisplay: TextView
@@ -25,9 +27,10 @@ class GameCard(view: View) : RecyclerView.ViewHolder(view){
         container = binding.content
         labelDisplay = binding.labelDisplay
         cameraImage = binding.cameraImage
+        validatingProgress = binding.validatingProgress
     }
 
-    fun setState(state: GameCardValidState?) {
+    fun setValidState(state: GameCardValidState?) {
         val drawableResource = when(state) {
             GameCardValidState.NO_STATE, null -> R.drawable.button_no_state
             GameCardValidState.INVALID -> R.drawable.button_error_state
@@ -53,6 +56,14 @@ class GameCard(view: View) : RecyclerView.ViewHolder(view){
             cameraImage.scaleType = ImageView.ScaleType.FIT_XY
         }
 
+    }
+
+    fun setValidationState(validationState: GameCardValidationState?) {
+        val visibility = when (validationState) {
+            GameCardValidationState.VALIDATING -> View.VISIBLE
+            else -> View.GONE
+        }
+        validatingProgress.visibility = visibility
     }
 
 }

@@ -15,16 +15,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintDimensionRatio="H,1:2"/>
-    <ImageView
-        android:id = "@+id/cameraImage"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/tile_camera"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/labelTop"
-        android:contentDescription="@string/cameraTile"/>
+        app:layout_constraintBottom_toTopOf="@id/labelTop">
+        <ImageView
+            android:id = "@+id/cameraImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/tile_camera"
+            android:contentDescription="@string/cameraTile"/>
+        <ProgressBar
+            android:id="@+id/validatingProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+    </FrameLayout>
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/labelTop"

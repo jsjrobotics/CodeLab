@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.dataStructures.GameCardState
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidState
+import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
 import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +81,10 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
         val label = pictureRequest?.label ?: return
         val uri = pictureRequest?.imageUri ?: return
         debug.print("$label Picture saved at $uri")
-        gameState.find { it.label == label }?.let { it.imageUri = uri }
+        gameState.find { it.label == label }?.let {
+            it.imageUri = uri
+            it.validationState = GameCardValidationState.VALIDATING
+        }
         viewModelScope.launch{
            _gameUpdates.emit(gameState)
         }
@@ -117,6 +121,6 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
     }
 
     companion object {
-        private const val GAME_TIME_LIMIT_SECONDS = 20
+        private const val GAME_TIME_LIMIT_SECONDS = 120
     }
 }

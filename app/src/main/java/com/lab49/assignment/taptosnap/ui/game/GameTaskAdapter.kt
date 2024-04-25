@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.dataStructures.GameCardState
+import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -30,7 +31,8 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Rec
         holder.setClickListener(onClickAction)
         holder.setLabel(cardState.label)
         holder.setImage(cardState.imageUri)
-        holder.setState(cardState.validState)
+        holder.setValidState(cardState.validState)
+        holder.setValidationState(cardState.validationState)
     }
 
     private fun buildClickAction(cardState: GameCardState): View.OnClickListener {
@@ -52,5 +54,15 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Rec
                 notifyItemChanged(updateIndex)
             }
         }
+    }
+
+    fun clearProgressIndicators() {
+        cardStates.forEachIndexed { index, gameCardState ->
+            if (gameCardState.validationState == GameCardValidationState.VALIDATING) {
+                gameCardState.validationState = GameCardValidationState.NOT_VALIDATING
+                notifyItemChanged(index)
+            }
+        }
+
     }
 }

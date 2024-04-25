@@ -100,6 +100,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                 .filterNotNull()
                 .collect { gameWon ->
                     displayGameEndDialog(gameWon)
+                    adapter.clearProgressIndicators()
                 }
         }
     }
