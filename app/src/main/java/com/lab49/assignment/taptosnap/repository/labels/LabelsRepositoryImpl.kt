@@ -1,5 +1,6 @@
 package com.lab49.assignment.taptosnap.repository.labels
 
+import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.dataStructures.ImageLabel
 import com.lab49.assignment.taptosnap.network.BackendApi
 import com.lab49.assignment.taptosnap.network.NetworkHelper
@@ -11,6 +12,7 @@ import javax.inject.Inject
 
 class LabelsRepositoryImpl @Inject constructor(private val offlineSource: LabelsOfflineSource,
                                                private val onlineSource: LabelsOnlineSource,
+    private val debug: DebugHelper
     ) : LabelsRepository {
 
     override suspend fun fetchLabels(): Boolean {
@@ -31,7 +33,7 @@ class LabelsRepositoryImpl @Inject constructor(private val offlineSource: Labels
     }
 
     override fun setLabels(values: Set<String>?) {
-        println("Saving labels $values")
+        debug.print("Saving labels $values")
         offlineSource.setLabels(values)
     }
 }

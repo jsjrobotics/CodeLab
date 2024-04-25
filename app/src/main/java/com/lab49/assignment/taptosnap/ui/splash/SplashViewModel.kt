@@ -1,6 +1,7 @@
 package com.lab49.assignment.taptosnap.ui.splash
 
 import androidx.lifecycle.ViewModel
+import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.network.NetworkHelper
 import com.lab49.assignment.taptosnap.repository.labels.LabelsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val labelsRepository: LabelsRepository,
-    private val networkHelper: NetworkHelper
+    private val networkHelper: NetworkHelper,
+    private val debug: DebugHelper
 ): ViewModel() {
     private val viewModelJob = SupervisorJob()
     private val networkScope = CoroutineScope(Dispatchers.IO + viewModelJob)
@@ -42,7 +44,7 @@ class SplashViewModel @Inject constructor(
                 labelsRepository.observeLabels()
                     .take(1)
                     .collect { updatedLabels ->
-                        println("Received labels: $updatedLabels")
+                        debug.print("Received labels: $updatedLabels")
                         _labelsLoaded.value = true
                     }
             }
