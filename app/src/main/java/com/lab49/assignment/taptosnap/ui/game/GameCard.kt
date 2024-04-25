@@ -48,14 +48,16 @@ class GameCard(view: View) : RecyclerView.ViewHolder(view){
         itemView.setOnClickListener(onClick)
     }
 
-    fun setImage(source: Uri?) {
+    fun setImage(source: Uri?): String? {
         source?.let {
             val contentResolver = itemView.context.contentResolver
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
             cameraImage.setImageBitmap(bitmap)
             cameraImage.scaleType = ImageView.ScaleType.FIT_XY
+            // Expensive operation to retrieve bitmap. hence send the value back to adaptor for validation
+            return bitmap.toString()
         }
-
+        return null
     }
 
     fun setValidationState(validationState: GameCardValidationState?) {

@@ -1,5 +1,6 @@
 package com.lab49.assignment.taptosnap.ui.game
 
+import android.net.Uri
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,9 +9,13 @@ import com.lab49.assignment.taptosnap.dataStructures.GameCardState
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidState
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
 import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
+import com.lab49.assignment.taptosnap.dataStructures.ValidateRequest
+import com.lab49.assignment.taptosnap.repository.validation.ValidationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,8 +35,13 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @HiltViewModel
-class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewModel()  {
+class GameViewModel @Inject constructor(private val debug: DebugHelper,
+    private val validationRepository: ValidationRepository
+): ViewModel()  {
     var gameInProgress: Boolean = false ; private set
+    private val viewModelJob = SupervisorJob()
+    private val networkScope = CoroutineScope(Dispatchers.IO + viewModelJob)
+
     private var pictureRequest: PictureRequest? = null
     private val gameState = mutableListOf<GameCardState>()
     private val _gameUpdates = MutableStateFlow<List<GameCardState>?>(null)
@@ -41,6 +51,11 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
     val timerUpdate = _timerUpdate.asStateFlow()
     val gameUpdates = _gameUpdates.asStateFlow()
     private var remainingSeconds = GAME_TIME_LIMIT_SECONDS
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 
     private fun startTimer() {
         viewModelScope.launch {
@@ -81,12 +96,23 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
         val label = pictureRequest?.label ?: return
         val uri = pictureRequest?.imageUri ?: return
         debug.print("$label Picture saved at $uri")
-        gameState.find { it.label == label }?.let {
+        val updatedState = gameState.find { it.label == label }
+        if (updatedState == null ) {
+            return
+        }
+        updatedState.let {
             it.imageUri = uri
             it.validationState = GameCardValidationState.VALIDATING
+            viewModelScope.launch{
+                _gameUpdates.emit(gameState)
+            }
         }
-        viewModelScope.launch{
-           _gameUpdates.emit(gameState)
+
+    }
+
+    fun validateImage(validateRequest: ValidateRequest) {
+        networkScope.launch {
+            validationRepository.validateImage(validateRequest)
         }
     }
 

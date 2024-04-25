@@ -64,6 +64,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                 observePictureRequests(this)
                 observeTimerUpdates(this)
                 observerGameCompletion(this)
+                observeValidateRequests(this)
             }
         }
 
@@ -150,6 +151,14 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                     debugHelper.print("SelectedLabel : $selectedLabel")
                     takePicture(selectedLabel)
                 }
+        }
+    }
+
+    private fun observeValidateRequests(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            adapter.validateRequest
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { request -> viewModel.validateImage(request) }
         }
     }
 

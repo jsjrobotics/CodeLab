@@ -8,15 +8,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.dataStructures.GameCardState
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
+import com.lab49.assignment.taptosnap.dataStructures.ValidateRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<GameCard>() {
     private val cardStates : MutableList<GameCardState> = mutableListOf()
-
+    private val _validateRequest = MutableSharedFlow<ValidateRequest>()
     private val _clickedLabel = MutableSharedFlow<String>()
     val clickedLabel = _clickedLabel.asSharedFlow()
+    val validateRequest = _validateRequest.asSharedFlow()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameCard {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.card_game, parent, false)
@@ -30,9 +32,14 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Rec
         val onClickAction = buildClickAction(cardState)
         holder.setClickListener(onClickAction)
         holder.setLabel(cardState.label)
-        holder.setImage(cardState.imageUri)
         holder.setValidState(cardState.validState)
         holder.setValidationState(cardState.validationState)
+        val bitmapString = holder.setImage(cardState.imageUri)
+        if (bitmapString != null) {
+            lifecycleScope.launch {
+                _validateRequest.emit(ValidateRequest(cardState.label, bitmapString))
+            }
+        }
     }
 
     private fun buildClickAction(cardState: GameCardState): View.OnClickListener {
