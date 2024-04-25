@@ -3,6 +3,7 @@ package com.lab49.assignment.taptosnap.ui.game
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -32,6 +33,7 @@ import java.io.File
 
 @AndroidEntryPoint
 class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fragment_game) {
+    private lateinit var timer: TextView
     private lateinit var adapter: GameTaskAdapter
     private val splashModel by activityViewModels<SplashViewModel>()
     private val viewModel by viewModels<GameViewModel>()
@@ -46,6 +48,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentGameBinding.bind(view)
+        timer = binding.countdown
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         val labels = splashModel.getOfflineLabels() ?: emptySet()
@@ -58,9 +61,23 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                 debugHelper.print("Repeat on lifecycle started")
                 observeGameUpdates(this)
                 observePictureRequests(this)
+                observeTimerUpdates(this)
             }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.beginGame()
+    }
+
+    private fun observeTimerUpdates(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            viewModel.timerUpdate
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { update -> timer.text = update }
+        }
     }
 
     private fun observeGameUpdates(coroutineScope: CoroutineScope) {
