@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.dataStructures.GameCardState
+import com.lab49.assignment.taptosnap.dataStructures.GameCardValidState
 import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -29,28 +30,38 @@ import kotlin.time.ExperimentalTime
 
 @HiltViewModel
 class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewModel()  {
-    private var gameInProgress: Boolean = false
+    var gameInProgress: Boolean = false ; private set
     private var pictureRequest: PictureRequest? = null
     private val gameState = mutableListOf<GameCardState>()
     private val _gameUpdates = MutableStateFlow<List<GameCardState>?>(null)
     private val _timerUpdate = MutableStateFlow<String?>(null)
-
+    private val _gameCompletion = MutableSharedFlow<Boolean?>()
+    val gameCompletion = _gameCompletion.asSharedFlow()
     val timerUpdate = _timerUpdate.asStateFlow()
     val gameUpdates = _gameUpdates.asStateFlow()
     private var remainingSeconds = GAME_TIME_LIMIT_SECONDS
 
     private fun startTimer() {
         viewModelScope.launch {
+            _gameCompletion.emit(null)
+            gameInProgress = true
+            remainingSeconds = GAME_TIME_LIMIT_SECONDS
             emitTime()
             oneSecondTimer().take(GAME_TIME_LIMIT_SECONDS)
-                .onCompletion { gameInProgress = false }
-                .onEach {
+                .flowOn(Dispatchers.IO)
+                .collect {
                     remainingSeconds -= 1
                     emitTime()
+                    if (remainingSeconds <= 0) {
+                        gameInProgress = false
+                        _gameCompletion.emit(hasGameBeenWon())
+                    }
                 }
-                .flowOn(Dispatchers.IO)
-                .collect()
         }
+    }
+
+    private fun hasGameBeenWon(): Boolean {
+        return !gameState.any { it.validState != GameCardValidState.VALID }
     }
 
     private suspend fun emitTime() {
@@ -101,12 +112,11 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
 
     fun beginGame() {
         if (!gameInProgress) {
-            gameInProgress = true
             startTimer()
         }
     }
 
     companion object {
-        private const val GAME_TIME_LIMIT_SECONDS = 120
+        private const val GAME_TIME_LIMIT_SECONDS = 20
     }
 }

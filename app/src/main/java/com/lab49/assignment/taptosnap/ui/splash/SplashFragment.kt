@@ -48,6 +48,7 @@ class SplashFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fr
         buttonStart.setOnClickListener {
             val navController = findNavController()
             navController.navigate(R.id.action_splashFragment_to_gameFragment)
+            buttonStart.isClickable = false
         }
         viewModel.labelsLoaded.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .onEach { isLabelsLoaded ->

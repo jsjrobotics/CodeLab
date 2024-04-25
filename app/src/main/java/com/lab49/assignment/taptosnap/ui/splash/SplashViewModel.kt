@@ -1,6 +1,7 @@
 package com.lab49.assignment.taptosnap.ui.splash
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.network.NetworkHelper
 import com.lab49.assignment.taptosnap.repository.labels.LabelsRepository
@@ -45,7 +46,7 @@ class SplashViewModel @Inject constructor(
                     .take(1)
                     .collect { updatedLabels ->
                         debug.print("Received labels: $updatedLabels")
-                        _labelsLoaded.value = true
+                        _labelsLoaded.emit(true)
                     }
             }
             return true
@@ -55,5 +56,8 @@ class SplashViewModel @Inject constructor(
 
     fun clearOfflineLabels() {
         labelsRepository.setLabels(null)
+        viewModelScope.launch {
+            _labelsLoaded.emit(false)
+        }
     }
 }
