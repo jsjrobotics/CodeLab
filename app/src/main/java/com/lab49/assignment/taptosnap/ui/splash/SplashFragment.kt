@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
  * are loaded or not. If they are loaded, enable the Start button. If not loaded, disable Start button.
  */
 @AndroidEntryPoint
-class SplashFragment: Fragment(R.layout.fragment_splash) {
+class SplashFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fragment_splash) {
     private val viewModel by activityViewModels<SplashViewModel>()
     private lateinit var buttonStart: AppCompatButton
     override fun onCreateView(
@@ -48,7 +49,7 @@ class SplashFragment: Fragment(R.layout.fragment_splash) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.labelsLoaded.collect { isLabelsLoaded ->
-                    println("Labels Loaded: $isLabelsLoaded")
+                    debugHelper.print("Labels Loaded: $isLabelsLoaded")
                     if (!isLabelsLoaded) {
                         viewModel.getOnlineLabels()
                     }

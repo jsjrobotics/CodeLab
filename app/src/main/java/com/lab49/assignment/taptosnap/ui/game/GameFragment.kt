@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.lab49.assignment.taptosnap.BuildConfig
+import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
 import com.lab49.assignment.taptosnap.databinding.FragmentGameBinding
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
-class GameFragment: Fragment(R.layout.fragment_game) {
+class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fragment_game) {
     private lateinit var adapter: GameTaskAdapter
     private val splashModel by activityViewModels<SplashViewModel>()
     private val viewModel by viewModels<GameViewModel>()
@@ -37,7 +38,7 @@ class GameFragment: Fragment(R.layout.fragment_game) {
             update?.apply { adapter.dataSetUpdated(update) }
 
         } else {
-            println("Failed to save image")
+            debugHelper.print("Failed to save image")
             viewModel.clearImageRequest()
         }
     }
@@ -53,7 +54,7 @@ class GameFragment: Fragment(R.layout.fragment_game) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
-                        println("SelectedLabel : $selectedLabel")
+                        debugHelper.print("SelectedLabel : $selectedLabel")
                         takePicture(selectedLabel)
                     }
                 }

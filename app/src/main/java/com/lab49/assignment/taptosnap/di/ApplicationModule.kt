@@ -21,4 +21,8 @@ class ApplicationModule {
     @Singleton
     @Provides
     fun provideDebugHelper() = DebugHelper()
+
+    @Singleton
+    @Provides
+    fun provideFragmentFactory(debugHelper: DebugHelper) = TapToSnapFragmentFactory(debugHelper)
 }
