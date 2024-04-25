@@ -23,16 +23,21 @@ import javax.inject.Inject
 @HiltViewModel
 class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewModel()  {
     private var pictureRequest: PictureRequest? = null
-    private val _gameUpdates = MutableStateFlow<GameCardState?>(null)
+    private val gameState = mutableListOf<GameCardState>()
+    private val _gameUpdates = MutableStateFlow<List<GameCardState>?>(null)
     val gameUpdates = _gameUpdates.asStateFlow()
+
+    private fun buildDataList(labels: Set<String>): MutableList<GameCardState> {
+        return labels.map { GameCardState(it) }.toMutableList()
+    }
 
     fun imageSaved() {
         val label = pictureRequest?.label ?: return
         val uri = pictureRequest?.imageUri ?: return
         debug.print("$label Picture saved at $uri")
-        val updatedState = GameCardState(label, imageUri = uri)
+        gameState.find { it.label == label }?.let { it.imageUri = uri }
         viewModelScope.launch{
-           _gameUpdates.emit(updatedState)
+           _gameUpdates.emit(gameState)
         }
     }
 
@@ -42,5 +47,13 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper): ViewMod
 
     fun clearImageRequest() {
         pictureRequest = null
+    }
+
+    fun setGameTasks(labels: Set<String>) {
+        gameState.clear()
+        buildDataList(labels).forEach { gameState.add(it) }
+        viewModelScope.launch{
+            _gameUpdates.emit(gameState)
+        }
     }
 }

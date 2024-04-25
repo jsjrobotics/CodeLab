@@ -49,12 +49,13 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         val labels = splashModel.getOfflineLabels() ?: emptySet()
-        adapter = GameTaskAdapter(lifecycleScope, labels)
+        viewModel.setGameTasks(labels)
+        adapter = GameTaskAdapter(lifecycleScope)
         recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                println("Repeat on lifecycle started")
+                debugHelper.print("Repeat on lifecycle started")
                 observeGameUpdates(this)
                 observePictureRequests(this)
             }

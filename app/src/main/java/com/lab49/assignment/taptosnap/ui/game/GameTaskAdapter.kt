@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope,
-                      labels: Set<String>) : RecyclerView.Adapter<GameCard>() {
-    private val cardStates : List<GameCardState> = buildDataList(labels)
+class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<GameCard>() {
+    private val cardStates : MutableList<GameCardState> = mutableListOf()
 
     private val _clickedLabel = MutableSharedFlow<String>()
     val clickedLabel = _clickedLabel.asSharedFlow()
@@ -42,16 +41,16 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope,
         }
     }
 
-    private fun buildDataList(labels: Set<String>): List<GameCardState> {
-        return labels.map { GameCardState(it) }
-    }
-
-    fun dataSetUpdated(gameUpdate: GameCardState) {
-        val updateIndex = cardStates.indexOfFirst { it.label == gameUpdate.label }
-        val localState = cardStates[updateIndex]
-        gameUpdate.imageUri?.let { localState.imageUri = it }
-        gameUpdate.validationState?.let { localState.validationState = it }
-        gameUpdate.validState?.let { localState.validState = it }
-        notifyItemChanged(updateIndex)
+    fun dataSetUpdated(updates: List<GameCardState>) {
+        updates.forEach { gameUpdate ->
+            val updateIndex = cardStates.indexOfFirst { it.label == gameUpdate.label }
+            if (updateIndex == -1) {
+                cardStates.add(gameUpdate)
+                notifyItemInserted(cardStates.size - 1)
+            } else {
+                cardStates[updateIndex] = gameUpdate
+                notifyItemChanged(updateIndex)
+            }
+        }
     }
 }
