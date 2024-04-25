@@ -56,7 +56,6 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         adapter = GameTaskAdapter(lifecycleScope)
         recyclerView.adapter = adapter
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 debugHelper.print("Repeat on lifecycle started")
@@ -65,6 +64,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                 observeTimerUpdates(this)
                 observerGameCompletion(this)
                 observeValidateRequests(this)
+
             }
         }
 

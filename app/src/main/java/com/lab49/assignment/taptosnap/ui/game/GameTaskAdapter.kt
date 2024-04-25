@@ -57,6 +57,7 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Rec
                 cardStates.add(gameUpdate)
                 notifyItemInserted(cardStates.size - 1)
             } else {
+                // TODO change to only update distinct state changes
                 cardStates[updateIndex] = gameUpdate
                 notifyItemChanged(updateIndex)
             }
