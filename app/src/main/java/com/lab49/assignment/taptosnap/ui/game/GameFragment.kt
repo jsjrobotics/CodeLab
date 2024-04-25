@@ -1,6 +1,5 @@
 package com.lab49.assignment.taptosnap.ui.game
 
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
@@ -10,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
@@ -20,10 +20,13 @@ import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
 import com.lab49.assignment.taptosnap.databinding.FragmentGameBinding
 import com.lab49.assignment.taptosnap.ui.splash.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -34,9 +37,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
     private val viewModel by viewModels<GameViewModel>()
     private val pictureResponseHandler = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
         if (success) {
-            val update = viewModel.imageSaved()
-            update?.apply { adapter.dataSetUpdated(update) }
-
+            viewModel.imageSaved()
         } else {
             debugHelper.print("Failed to save image")
             viewModel.clearImageRequest()
@@ -50,18 +51,39 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
         val labels = splashModel.getOfflineLabels() ?: emptySet()
         adapter = GameTaskAdapter(lifecycleScope, labels)
         recyclerView.adapter = adapter
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
-                        debugHelper.print("SelectedLabel : $selectedLabel")
-                        takePicture(selectedLabel)
-                    }
-                }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                println("Repeat on lifecycle started")
+                observeGameUpdates(this)
+                observePictureRequests(this)
             }
         }
 
+    }
+
+    private fun observeGameUpdates(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            viewModel.gameUpdates
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .onStart { debugHelper.print("listing to game updates") }
+                .onCompletion { debugHelper.print("no longer listening to game updates") }
+                .filterNotNull()
+                .collect { update -> adapter.dataSetUpdated(update) }
+        }
+    }
+
+    private fun observePictureRequests(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            adapter.clickedLabel
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .onStart { debugHelper.print("listing to label clicks") }
+                .onCompletion { debugHelper.print("no longer listening to label clicks") }
+                .collect { selectedLabel ->
+                    debugHelper.print("SelectedLabel : $selectedLabel")
+                    takePicture(selectedLabel)
+                }
+        }
     }
 
     private fun takePicture(label: String) {

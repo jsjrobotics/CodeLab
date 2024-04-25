@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -17,6 +18,8 @@ import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -46,17 +49,13 @@ class SplashFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fr
             val navController = findNavController()
             navController.navigate(R.id.action_splashFragment_to_gameFragment)
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.labelsLoaded.collect { isLabelsLoaded ->
-                    debugHelper.print("Labels Loaded: $isLabelsLoaded")
-                    if (!isLabelsLoaded) {
-                        viewModel.getOnlineLabels()
-                    }
-                    buttonStart.isClickable = isLabelsLoaded
-
+        viewModel.labelsLoaded.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .onEach { isLabelsLoaded ->
+                debugHelper.print("Labels Loaded: $isLabelsLoaded")
+                if (!isLabelsLoaded) {
+                    viewModel.getOnlineLabels()
                 }
-            }
-        }
+                buttonStart.isClickable = isLabelsLoaded
+            }.launchIn(lifecycleScope)
     }
 }
