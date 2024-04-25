@@ -1,17 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_210"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin ="@dimen/dp_10"
     android:background="@drawable/button_no_state">
-<TextView
-    android:id="@+id/labelDisplay"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_constraintTop_toTopOf="parent"
-    android:background="@color/bg_gray"
-    android:layout_margin="@dimen/dp_3"
-    app:layout_constraintStart_toStartOf="parent"
-    android:textColor="@color/white"/>
+    <ImageView
+        android:id = "@+id/cameraImage"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_210"
+        android:scaleType="fitCenter"
+        android:src="@drawable/tile_camera"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/labelTop"
+        android:contentDescription="@string/cameraTile" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/labelTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".75" />
+    <TextView
+        android:id="@+id/labelDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/labelTop"
+        android:gravity="center"
+        android:textSize="@dimen/sp_24"
+        android:background="@color/bg_gray"
+        android:layout_margin="@dimen/dp_3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/white"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

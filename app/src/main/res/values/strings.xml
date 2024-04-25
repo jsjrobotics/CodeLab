@@ -12,4 +12,5 @@
     <string name="no_item_found">No Items Found</string>
     <string name="welcome_to">Welcome to</string>
     <string name="content_description_splash">Splash Screen</string>
+    <string name="cameraTile">Camera Tile</string>
 </resources>
