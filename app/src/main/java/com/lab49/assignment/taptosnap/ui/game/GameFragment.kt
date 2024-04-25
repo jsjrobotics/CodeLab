@@ -21,16 +21,21 @@ import com.lab49.assignment.taptosnap.ui.splash.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
 class GameFragment: Fragment(R.layout.fragment_game) {
+    private lateinit var adapter: GameTaskAdapter
     private val splashModel by activityViewModels<SplashViewModel>()
     private val viewModel by viewModels<GameViewModel>()
     private val pictureResponseHandler = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
         if (success) {
-            viewModel.imageSaved()
+            val update = viewModel.imageSaved()
+            update?.apply { adapter.dataSetUpdated(update) }
+
         } else {
             println("Failed to save image")
             viewModel.clearImageRequest()
@@ -42,14 +47,17 @@ class GameFragment: Fragment(R.layout.fragment_game) {
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         val labels = splashModel.getOfflineLabels() ?: emptySet()
-        val adapter = GameTaskAdapter(lifecycleScope, labels)
+        adapter = GameTaskAdapter(lifecycleScope, labels)
         recyclerView.adapter = adapter
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
-                    println("SelectedLabel : $selectedLabel")
-                    takePicture(selectedLabel)
+                launch {
+                    adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
+                        println("SelectedLabel : $selectedLabel")
+                        takePicture(selectedLabel)
+                    }
                 }
+
             }
         }
 
