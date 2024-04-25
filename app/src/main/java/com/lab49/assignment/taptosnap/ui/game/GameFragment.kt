@@ -1,10 +1,11 @@
 package com.lab49.assignment.taptosnap.ui.game
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
+import android.os.Environment
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -12,19 +13,29 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.lab49.assignment.taptosnap.BuildConfig
 import com.lab49.assignment.taptosnap.R
+import com.lab49.assignment.taptosnap.dataStructures.PictureRequest
 import com.lab49.assignment.taptosnap.databinding.FragmentGameBinding
 import com.lab49.assignment.taptosnap.ui.splash.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class GameFragment: Fragment(R.layout.fragment_game) {
     private val splashModel by activityViewModels<SplashViewModel>()
-    val viewModel by viewModels<GameViewModel>()
-
+    private val viewModel by viewModels<GameViewModel>()
+    private val pictureResponseHandler = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+        if (success) {
+            viewModel.imageSaved()
+        } else {
+            println("Failed to save image")
+            viewModel.clearImageRequest()
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentGameBinding.bind(view)
@@ -37,18 +48,19 @@ class GameFragment: Fragment(R.layout.fragment_game) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
                     println("SelectedLabel : $selectedLabel")
-                    viewModel.taskSelected(selectedLabel)
-                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    try {
-                        requireActivity().startActivityForResult(takePictureIntent, 1)
-                    } catch (e: ActivityNotFoundException) {
-                        // display error state to the user
-                    }
-
+                    takePicture(selectedLabel)
                 }
             }
         }
 
+    }
+
+    private fun takePicture(label: String) {
+        val pictureStorage = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), label)
+        val imageUri = FileProvider.getUriForFile(requireActivity(), BuildConfig.APPLICATION_ID + ".provider", pictureStorage);
+        val pictureRequest = PictureRequest(label, imageUri)
+        viewModel.pendingImage(pictureRequest)
+        pictureResponseHandler.launch(imageUri)
     }
 
     companion object {
