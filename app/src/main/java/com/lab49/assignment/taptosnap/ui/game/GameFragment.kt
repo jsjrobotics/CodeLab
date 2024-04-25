@@ -1,6 +1,9 @@
 package com.lab49.assignment.taptosnap.ui.game
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,13 +31,20 @@ class GameFragment: Fragment(R.layout.fragment_game) {
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         val labels = splashModel.getOfflineLabels() ?: emptySet()
-        val adapter = GameTaskAdapter(labels)
+        val adapter = GameTaskAdapter(lifecycleScope, labels)
         recyclerView.adapter = adapter
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
                     println("SelectedLabel : $selectedLabel")
                     viewModel.taskSelected(selectedLabel)
+                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    try {
+                        requireActivity().startActivityForResult(takePictureIntent, 1)
+                    } catch (e: ActivityNotFoundException) {
+                        // display error state to the user
+                    }
+
                 }
             }
         }

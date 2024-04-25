@@ -1,7 +1,9 @@
 package com.lab49.assignment.taptosnap.ui.splash
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -24,6 +26,17 @@ import kotlinx.coroutines.launch
 class SplashFragment: Fragment(R.layout.fragment_splash) {
     private val viewModel by activityViewModels<SplashViewModel>()
     private lateinit var buttonStart: AppCompatButton
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        if (savedInstanceState == null) {
+            viewModel.clearOfflineLabels()
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentSplashBinding.bind(view)

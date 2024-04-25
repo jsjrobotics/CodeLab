@@ -50,4 +50,8 @@ class SplashViewModel @Inject constructor(
         }
         return false
     }
+
+    fun clearOfflineLabels() {
+        labelsRepository.setLabels(null)
+    }
 }

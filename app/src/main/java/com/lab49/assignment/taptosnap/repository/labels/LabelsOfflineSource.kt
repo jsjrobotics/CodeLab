@@ -16,9 +16,13 @@ class LabelsOfflineSource @Inject constructor(@ApplicationContext context: Conte
     }
 
     fun setLabels(labelValues: Set<String>?): Boolean {
-        return sharedPreferences.edit()
-            .putStringSet(keyLabels, labelValues)
-            .commit()
+        val editor = sharedPreferences.edit()
+        if (labelValues.isNullOrEmpty()) {
+            editor.remove(keyLabels)
+        } else {
+            editor.putStringSet(keyLabels, labelValues)
+        }
+        return editor.commit()
     }
 
     companion object {

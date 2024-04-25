@@ -14,7 +14,7 @@
     <ImageView
         android:id="@+id/welcome_to"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_210"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:src="@drawable/logo"
         android:fontFamily="@font/karla_regular"

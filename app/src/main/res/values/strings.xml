@@ -13,4 +13,7 @@
     <string name="welcome_to">Welcome to</string>
     <string name="content_description_splash">Splash Screen</string>
     <string name="cameraTile">Camera Tile</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="requested_permissions_required">All permissions are required for correct operation</string>
+    <string name="retry_permission">Retry</string>
 </resources>
