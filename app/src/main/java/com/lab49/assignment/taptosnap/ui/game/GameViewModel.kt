@@ -38,6 +38,7 @@ import kotlin.time.ExperimentalTime
 class GameViewModel @Inject constructor(private val debug: DebugHelper,
     private val validationRepository: ValidationRepository
 ): ViewModel()  {
+    private var awaitingValidation: String? = null
     var gameInProgress: Boolean = false ; private set
     private val viewModelJob = SupervisorJob()
     private val networkScope = CoroutineScope(Dispatchers.IO + viewModelJob)
@@ -59,9 +60,10 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper,
 
     private fun startTimer() {
         viewModelScope.launch {
-            _gameCompletion.emit(null)
-            gameInProgress = true
             remainingSeconds = GAME_TIME_LIMIT_SECONDS
+            awaitingValidation = null
+            gameInProgress = true
+            _gameCompletion.emit(null)
             emitTime()
             oneSecondTimer().take(GAME_TIME_LIMIT_SECONDS)
                 .flowOn(Dispatchers.IO)
@@ -106,13 +108,17 @@ class GameViewModel @Inject constructor(private val debug: DebugHelper,
             viewModelScope.launch{
                 _gameUpdates.emit(gameState)
             }
+            awaitingValidation = it.label
         }
 
     }
 
     fun validateImage(validateRequest: ValidateRequest) {
-        networkScope.launch {
-            validationRepository.validateImage(validateRequest)
+        if (validateRequest.imageLabel == awaitingValidation) {
+            awaitingValidation = null
+            networkScope.launch {
+                validationRepository.validateImage(validateRequest)
+            }
         }
     }
 
