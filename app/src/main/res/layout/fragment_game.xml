@@ -2,6 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/dp_10"
+    android:layout_marginEnd="@dimen/dp_10"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/bg_gray">
 
@@ -10,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".05"/>
+        app:layout_constraintGuide_percent=".10"/>
     <TextView
         android:id="@+id/header_tap_to_snap"
         android:layout_width="match_parent"
@@ -23,17 +25,25 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tasks"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/header_tap_to_snap"
-        app:layout_constraintBottom_toTopOf="@id/countdown"/>
+        app:layout_constraintBottom_toTopOf="@id/guideline_countdown"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".85"/>
 
     <TextView
         android:id="@+id/countdown"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_175"
+        android:layout_height="0dp"
         android:textColor="@color/white"
         android:gravity="center"
         android:textSize="@dimen/sp_48"
+        app:layout_constraintTop_toBottomOf="@id/guideline_countdown"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

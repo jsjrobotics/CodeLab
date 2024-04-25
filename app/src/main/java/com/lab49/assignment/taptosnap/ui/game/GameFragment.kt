@@ -5,11 +5,17 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.databinding.FragmentGameBinding
 import com.lab49.assignment.taptosnap.ui.splash.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class GameFragment: Fragment(R.layout.fragment_game) {
@@ -22,7 +28,17 @@ class GameFragment: Fragment(R.layout.fragment_game) {
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
         val labels = splashModel.getOfflineLabels() ?: emptySet()
-        recyclerView.adapter = GameTaskAdapter(labels)
+        val adapter = GameTaskAdapter(labels)
+        recyclerView.adapter = adapter
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.clickedLabel.filterNotNull().collect { selectedLabel ->
+                    println("SelectedLabel : $selectedLabel")
+                    viewModel.taskSelected(selectedLabel)
+                }
+            }
+        }
+
     }
 
     companion object {

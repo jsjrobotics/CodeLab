@@ -6,4 +6,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GameViewModel @Inject constructor(): ViewModel()  {
+    fun taskSelected(selectedLabel: String) {
+
+    }
 }
