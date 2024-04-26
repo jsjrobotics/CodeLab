@@ -14,6 +14,7 @@ import com.lab49.assignment.taptosnap.repository.validation.ValidationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -35,6 +36,7 @@ import kotlin.time.ExperimentalTime
 class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
                                         private val validationRepository: ValidationRepository
 ): ViewModel()  {
+    private var timerJob: Job? = null
     private var awaitingValidation: String? = null
     var gameInProgress: Boolean = false ; private set
     private val viewModelJob = SupervisorJob()
@@ -58,7 +60,7 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
     }
 
     private fun startTimer() {
-        viewModelScope.launch {
+        timerJob = viewModelScope.launch {
             remainingSeconds = GAME_TIME_LIMIT_SECONDS
             awaitingValidation = null
             gameInProgress = true
@@ -85,9 +87,10 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
     }
 
     private suspend fun endGame() {
-        viewModelScope.cancel()
         gameInProgress = false
         _gameCompletion.emit(hasGameBeenWon())
+        timerJob?.cancel()
+        timerJob = null
     }
 
     private fun hasGameBeenWon(): Boolean {
