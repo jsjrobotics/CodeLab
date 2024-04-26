@@ -12,4 +12,6 @@
     <color name="tile_gray">#584D5D</color>
     <color name="tile_gray_dark">#473C4D</color>
     <color name="white">#ffffff</color>
+    <color name="alert_dialog_button">#843197</color>
+
 </resources>

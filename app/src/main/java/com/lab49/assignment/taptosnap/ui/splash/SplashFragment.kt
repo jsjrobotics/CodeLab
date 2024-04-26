@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.databinding.FragmentSplashBinding
+import com.lab49.assignment.taptosnap.ui.game.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
@@ -29,6 +30,8 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class SplashFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fragment_splash) {
     private val viewModel by activityViewModels<SplashViewModel>()
+    private val gameViewModel by activityViewModels<GameViewModel>()
+
     private lateinit var buttonStart: AppCompatButton
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,7 +51,13 @@ class SplashFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fr
         buttonStart.setOnClickListener {
             val navController = findNavController()
             navController.navigate(R.id.action_splashFragment_to_gameFragment)
+            val labels = viewModel.getOfflineLabels() ?: run {
+                debugHelper.print("Game is starting with no tasks")
+                emptySet()
+            }
+            gameViewModel.setGameTasks(labels)
             buttonStart.isClickable = false
+            gameViewModel.beginGame()
         }
         viewModel.labelsLoaded.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .onEach { isLabelsLoaded ->

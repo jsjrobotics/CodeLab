@@ -18,13 +18,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintDimensionRatio="H,2:3"
         app:layout_constraintBottom_toTopOf="@id/labelTop">
-        <ImageView
-            android:id = "@+id/cameraImage"
+        <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/tile_camera"
             android:layout_gravity="center"
-            android:contentDescription="@string/cameraTile"/>
+            app:cardCornerRadius="@dimen/dp_10">
+            <ImageView
+                android:id = "@+id/cameraImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/tile_camera"
+                android:background="@drawable/game_card_inner_rectangle"
+                android:contentDescription="@string/cameraTile"/>
+        </androidx.cardview.widget.CardView>
+
         <ProgressBar
             android:id="@+id/validatingProgress"
             android:layout_width="wrap_content"
@@ -32,6 +39,13 @@
             android:indeterminate="true"
             android:layout_gravity="center"
             android:visibility="gone"/>
+        <TextView
+            android:id="@+id/tapToRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_to_try_again"
+            android:visibility="gone"
+            android:layout_gravity="center" />
     </FrameLayout>
 
 

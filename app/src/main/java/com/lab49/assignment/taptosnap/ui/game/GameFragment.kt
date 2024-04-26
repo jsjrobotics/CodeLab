@@ -83,23 +83,12 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
 
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (!viewModel.gameInProgress) {
-            val labels = splashModel.getOfflineLabels() ?: run {
-                debugHelper.print("Game is starting with no tasks")
-                emptySet()
-            }
-            viewModel.setGameTasks(labels)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
+
         viewModel.currentState().forEach {
             adapter.dataSetUpdated(it)
         }
-        viewModel.beginGame()
     }
 
     private fun observeTimerUpdates(coroutineScope: CoroutineScope) {
@@ -123,22 +112,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
     }
 
     private fun displayGameEndDialog(gameWon: Boolean) {
-        val message = if (gameWon) {
-            R.string.game_won
-        } else {
-            R.string.better_luck
-        }
-        val builder = AlertDialog.Builder(requireContext(), R.style.Theme_TapToSnap)
-        builder.setTitle(R.string.game_over)
-            .setMessage(message)
-            .setPositiveButton(
-                R.string.retry_permission
-            ) { dialogInterface, _ ->
-                dialogInterface.dismiss()
-                findNavController().navigate(R.id.action_gameFragment_to_splashFragment)
-            }.setNegativeButton(R.string.exit) { dialogInterface, _ ->
-                dialogInterface.dismiss()
-            }.show()
+        GameCompletionDialogFragment(gameWon).show(parentFragmentManager, "CompletionDialog")
     }
 
     private fun observeGameUpdates(coroutineScope: CoroutineScope) {

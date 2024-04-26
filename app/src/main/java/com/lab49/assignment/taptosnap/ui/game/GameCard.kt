@@ -17,6 +17,7 @@ import com.lab49.assignment.taptosnap.databinding.CardGameBinding
 
 
 class GameCard(view: View) : RecyclerView.ViewHolder(view){
+    private var tapToRetry: TextView
     private var validatingProgress: ProgressBar
     private var container: ConstraintLayout
     private var cameraImage: ImageView
@@ -28,6 +29,7 @@ class GameCard(view: View) : RecyclerView.ViewHolder(view){
         labelDisplay = binding.labelDisplay
         cameraImage = binding.cameraImage
         validatingProgress = binding.validatingProgress
+        tapToRetry = binding.tapToRetry
     }
 
     fun setValidState(state: GameCardValidState?) {
@@ -38,6 +40,12 @@ class GameCard(view: View) : RecyclerView.ViewHolder(view){
         }
         val drawable = AppCompatResources.getDrawable(itemView.context, drawableResource)
         container.background = drawable
+        val visibility = if (state == GameCardValidState.INVALID) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        tapToRetry.visibility = visibility
 
     }
     fun setLabel(label: String) {
