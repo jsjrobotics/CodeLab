@@ -7,7 +7,8 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.navigation.fragment.findNavController
 import com.lab49.assignment.taptosnap.R
 
-class GameCompletionDialogFragment(private val gameWon: Boolean) : AppCompatDialogFragment() {
+class GameCompletionDialogFragment : AppCompatDialogFragment() {
+    private var gameWon = false
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val message = if (gameWon) {
             R.string.game_won
@@ -26,5 +27,9 @@ class GameCompletionDialogFragment(private val gameWon: Boolean) : AppCompatDial
                 dialogInterface.dismiss()
             }
         return builder.create()
+    }
+
+    fun setWinState(gameWon: Boolean) {
+        this.gameWon = gameWon
     }
 }

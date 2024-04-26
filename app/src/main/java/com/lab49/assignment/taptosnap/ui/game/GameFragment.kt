@@ -111,7 +111,9 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
     }
 
     private fun displayGameEndDialog(gameWon: Boolean) {
-        GameCompletionDialogFragment(gameWon).show(parentFragmentManager, "CompletionDialog")
+        val dialogFragment = GameCompletionDialogFragment()
+        dialogFragment.setWinState(gameWon)
+        dialogFragment.show(parentFragmentManager, "CompletionDialog")
     }
 
     private fun observeGameUpdates(coroutineScope: CoroutineScope) {
