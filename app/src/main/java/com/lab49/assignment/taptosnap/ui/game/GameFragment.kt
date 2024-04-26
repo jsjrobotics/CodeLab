@@ -1,9 +1,12 @@
 package com.lab49.assignment.taptosnap.ui.game
 
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -40,21 +44,30 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
     private lateinit var adapter: GameTaskAdapter
     private val splashModel by activityViewModels<SplashViewModel>()
     private val viewModel by activityViewModels<GameViewModel>()
-    private val pictureResponseHandler = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
-        if (success) {
-            viewModel.imageSaved()
-        } else {
-            debugHelper.print("Failed to save image")
-            viewModel.clearImageRequest()
+    private lateinit var pictureResponseHandler: ActivityResultLauncher<Uri>
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        registerPictureResponseHandler()
+    }
+
+    private fun registerPictureResponseHandler() {
+        pictureResponseHandler = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+            if (success) {
+                viewModel.imageSaved()
+            } else {
+                debugHelper.print("Failed to save image")
+                viewModel.clearImageRequest()
+            }
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentGameBinding.bind(view)
         timer = binding.countdown
         val recyclerView = binding.tasks
         recyclerView.layoutManager = GridLayoutManager(requireContext(), SPAN_COUNT)
-        adapter = GameTaskAdapter(lifecycleScope)
+        adapter = GameTaskAdapter(lifecycleScope, debugHelper)
         recyclerView.adapter = adapter
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
@@ -83,6 +96,9 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
 
     override fun onResume() {
         super.onResume()
+        viewModel.currentState().forEach {
+            adapter.dataSetUpdated(it)
+        }
         viewModel.beginGame()
     }
 
@@ -133,6 +149,7 @@ class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.frag
                 .onCompletion { debugHelper.print("no longer listening to game updates") }
                 .filterNotNull()
                 .collect { update ->
+                    debugHelper.print("Received game update ${update.hashCode()}")
                     adapter.dataSetUpdated(update)
                 }
         }

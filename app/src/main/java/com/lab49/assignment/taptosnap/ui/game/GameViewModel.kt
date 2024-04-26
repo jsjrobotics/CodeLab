@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +25,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +35,6 @@ import kotlin.time.ExperimentalTime
 class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
                                         private val validationRepository: ValidationRepository
 ): ViewModel()  {
-    private var updateId: Int = 0
     private var awaitingValidation: String? = null
     var gameInProgress: Boolean = false ; private set
     private val viewModelJob = SupervisorJob()
@@ -44,16 +42,17 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
 
     private var pictureRequest: PictureRequest? = null
     private val gameState = mutableListOf<GameCardState>()
-    private val _gameUpdates = MutableStateFlow<List<GameCardState>?>(null)
+    private val _gameUpdates = MutableSharedFlow<GameCardState?>()
     private val _timerUpdate = MutableStateFlow<String?>(null)
     private val _gameCompletion = MutableSharedFlow<Boolean?>()
     val gameCompletion = _gameCompletion.asSharedFlow()
     val timerUpdate = _timerUpdate.asStateFlow()
-    val gameUpdates = _gameUpdates.asStateFlow()
+    val gameUpdates = _gameUpdates.asSharedFlow()
     private var remainingSeconds = GAME_TIME_LIMIT_SECONDS
 
 
     override fun onCleared() {
+        debugHelper.print("View model jobs cleared")
         super.onCleared()
         viewModelJob.cancel()
     }
@@ -71,15 +70,13 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
                     remainingSeconds -= 1
                     emitTime()
                     if (remainingSeconds <= 0) {
-                        gameInProgress = false
-                        _gameCompletion.emit(hasGameBeenWon())
+                        endGame()
                     }
                 }
         }
+
         viewModelScope.launch {
             validationRepository.observeResponses()
-                .onStart { debugHelper.print("listing to validation responses") }
-                .onCompletion { debugHelper.print("no longer listening validation responses") }
                 .filterNotNull()
                 .collect { validateResponse ->
                     updateTaskValidated(validateResponse)
@@ -87,15 +84,21 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
         }
     }
 
+    private suspend fun endGame() {
+        viewModelScope.cancel()
+        gameInProgress = false
+        _gameCompletion.emit(hasGameBeenWon())
+    }
+
     private fun hasGameBeenWon(): Boolean {
-        return !gameState.any { it.validState != GameCardValidState.VALID }
+        return gameState.all { it.validState == GameCardValidState.VALID }
     }
 
     private suspend fun emitTime() {
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
         val display = String.format("%02d:%02d:%02d", 0, minutesLeft, secondsLeft)
-        debugHelper.print("Time left $display")
+        debugHelper.print("Time left $display", andWith = false)
         _timerUpdate.emit(display)
     }
 
@@ -119,7 +122,8 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
         updatedState.let {
             it.imageUri = uri
             it.validationState = GameCardValidationState.VALIDATING
-            notifyGameUpdate()
+            debugHelper.print("Validating update")
+            notifyGameUpdate(it)
         }
     }
 
@@ -136,13 +140,18 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
                 GameCardValidState.INVALID
             }
             it.validState = state
-            notifyGameUpdate()
+            debugHelper.print("Validated update")
+            notifyGameUpdate(it)
+            if (gameState.all { checkState -> checkState.validState == GameCardValidState.VALID }) {
+                viewModelScope.launch { endGame() }
+            }
         }
     }
 
-    private fun notifyGameUpdate() {
+    private fun notifyGameUpdate(gameCardState: GameCardState) {
         viewModelScope.launch{
-            _gameUpdates.emit(gameState)
+            debugHelper.print("Posting Game update: ${gameCardState.hashCode()}")
+            _gameUpdates.emit(gameCardState)
         }
     }
 
@@ -165,9 +174,11 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
 
     fun setGameTasks(labels: Set<String>) {
         gameState.clear()
-        buildDataList(labels).forEach { gameState.add(it) }
-        viewModelScope.launch{
-            _gameUpdates.emit(gameState)
+        buildDataList(labels).forEach {
+            gameState.add(it)
+            viewModelScope.launch {
+                notifyGameUpdate(it)
+            }
         }
     }
 
@@ -181,8 +192,13 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
 
     fun beginGame() {
         if (!gameInProgress) {
+            debugHelper.print("Game Starting")
             startTimer()
         }
+    }
+
+    fun currentState(): List<GameCardState> {
+        return gameState.toList()
     }
 
     companion object {

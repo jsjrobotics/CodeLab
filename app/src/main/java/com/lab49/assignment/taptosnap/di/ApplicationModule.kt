@@ -1,6 +1,10 @@
 package com.lab49.assignment.taptosnap.di
 
 import com.lab49.assignment.taptosnap.DebugHelper
+import com.lab49.assignment.taptosnap.repository.labels.LabelsRepository
+import com.lab49.assignment.taptosnap.repository.labels.LabelsRepositoryImpl
+import com.lab49.assignment.taptosnap.repository.validation.ValidationRepository
+import com.lab49.assignment.taptosnap.repository.validation.ValidationRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +29,16 @@ class ApplicationModule {
     @Singleton
     @Provides
     fun provideFragmentFactory(debugHelper: DebugHelper) = TapToSnapFragmentFactory(debugHelper)
+
+    @Provides
+    @Singleton
+    fun provideLabelRepository(impl: LabelsRepositoryImpl): LabelsRepository {
+        return impl
+    }
+
+    @Provides
+    @Singleton
+    fun provideValidationRepository(impl: ValidationRepositoryImpl) : ValidationRepository {
+        return impl
+    }
 }

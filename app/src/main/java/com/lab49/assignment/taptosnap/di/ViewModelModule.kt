@@ -8,19 +8,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ViewModelComponent::class)
 class ViewModelModule {
 
-    @Provides
-    fun provideLabelRepository(impl: LabelsRepositoryImpl): LabelsRepository {
-        return impl
-    }
 
-    @Provides
-    fun provideValidationRepository(impl: ValidationRepositoryImpl) : ValidationRepository {
-        return impl
-    }
 
 }

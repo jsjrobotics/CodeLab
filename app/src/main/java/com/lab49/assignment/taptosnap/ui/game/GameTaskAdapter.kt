@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
+import com.lab49.assignment.taptosnap.DebugHelper
 import com.lab49.assignment.taptosnap.R
 import com.lab49.assignment.taptosnap.dataStructures.GameCardState
 import com.lab49.assignment.taptosnap.dataStructures.GameCardValidationState
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<GameCard>() {
+class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope,
+    private val debugHelper: DebugHelper) : RecyclerView.Adapter<GameCard>() {
     private val cardStates : MutableList<GameCardState> = mutableListOf()
     private val _validateRequest = MutableSharedFlow<ValidateRequest>()
     private val _clickedLabel = MutableSharedFlow<String>()
@@ -50,18 +52,17 @@ class GameTaskAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Rec
         }
     }
 
-    fun dataSetUpdated(updates: List<GameCardState>) {
-        updates.forEach { gameUpdate ->
-            val updateIndex = cardStates.indexOfFirst { it.label == gameUpdate.label }
-            if (updateIndex == -1) {
-                cardStates.add(gameUpdate)
-                notifyItemInserted(cardStates.size - 1)
-            } else {
-                // TODO change to only update distinct state changes
-                cardStates[updateIndex] = gameUpdate
-                notifyItemChanged(updateIndex)
-            }
+    fun dataSetUpdated(gameUpdate: GameCardState) {
+        val updateIndex = cardStates.indexOfFirst { it.label == gameUpdate.label }
+        if (updateIndex == -1) {
+            cardStates.add(gameUpdate)
+            notifyItemInserted(cardStates.size - 1)
+        } else {
+            // TODO change to only update distinct state changes
+            cardStates[updateIndex] = gameUpdate
+            notifyItemChanged(updateIndex)
         }
+
     }
 
     fun clearProgressIndicators() {
