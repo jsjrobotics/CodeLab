@@ -46,8 +46,8 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
     private val gameState = mutableListOf<GameCardState>()
     private val _gameUpdates = MutableSharedFlow<GameCardState?>()
     private val _timerUpdate = MutableStateFlow<String?>(null)
-    private val _gameCompletion = MutableSharedFlow<Boolean?>()
-    val gameCompletion = _gameCompletion.asSharedFlow()
+    private val _gameCompletion = MutableStateFlow<Boolean?>(null)
+    val gameCompletion = _gameCompletion.asStateFlow()
     val timerUpdate = _timerUpdate.asStateFlow()
     val gameUpdates = _gameUpdates.asSharedFlow()
     private var remainingSeconds = GAME_TIME_LIMIT_SECONDS

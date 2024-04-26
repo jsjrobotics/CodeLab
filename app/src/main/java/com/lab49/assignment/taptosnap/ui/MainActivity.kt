@@ -19,16 +19,14 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private lateinit var gameFragment: GameFragment
-    private lateinit var splashFragment: SplashFragment
     private val requestCode = hashCode()
-    @Inject
-    lateinit var factory: TapToSnapFragmentFactory
+    //TODO this should be injected
+    val factory  = TapToSnapFragmentFactory(DebugHelper())
     @Inject
     lateinit var debugHelper: DebugHelper
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         supportFragmentManager.fragmentFactory = factory
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController

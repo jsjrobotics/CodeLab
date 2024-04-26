@@ -42,7 +42,6 @@ import java.io.File
 class GameFragment(private val debugHelper: DebugHelper): Fragment(R.layout.fragment_game) {
     private lateinit var timer: TextView
     private lateinit var adapter: GameTaskAdapter
-    private val splashModel by activityViewModels<SplashViewModel>()
     private val viewModel by activityViewModels<GameViewModel>()
     private lateinit var pictureResponseHandler: ActivityResultLauncher<Uri>
     override fun onCreate(savedInstanceState: Bundle?) {
