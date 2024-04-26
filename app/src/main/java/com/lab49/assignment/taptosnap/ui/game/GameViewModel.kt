@@ -59,6 +59,52 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
         viewModelJob.cancel()
     }
 
+    fun imageSaved() {
+        val label = pictureRequest?.label ?: return
+        val uri = pictureRequest?.imageUri ?: return
+        debugHelper.print("$label Picture saved at $uri")
+        updateTaskToValidating(label, uri)
+        awaitingValidation = label
+    }
+
+    fun validateImage(validateRequest: ValidateRequest) {
+        if (validateRequest.imageLabel == awaitingValidation) {
+            awaitingValidation = null
+            networkScope.launch {
+                validationRepository.validateImage(validateRequest)
+            }
+        }
+    }
+
+    fun pendingImage(pictureRequest: PictureRequest) {
+        this.pictureRequest = pictureRequest
+    }
+
+    fun clearImageRequest() {
+        pictureRequest = null
+    }
+
+    fun setGameTasks(labels: Set<String>) {
+        gameState.clear()
+        buildDataList(labels).forEach {
+            gameState.add(it)
+            viewModelScope.launch {
+                notifyGameUpdate(it)
+            }
+        }
+    }
+
+    fun beginGame() {
+        if (!gameInProgress) {
+            debugHelper.print("Game Starting")
+            startTimer()
+        }
+    }
+
+    fun currentState(): List<GameCardState> {
+        return gameState.toList()
+    }
+
     private fun startTimer() {
         timerJob = viewModelScope.launch {
             remainingSeconds = GAME_TIME_LIMIT_SECONDS
@@ -108,15 +154,6 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
     private fun buildDataList(labels: Set<String>): MutableList<GameCardState> {
         return labels.map { GameCardState(it) }.toMutableList()
     }
-
-    fun imageSaved() {
-        val label = pictureRequest?.label ?: return
-        val uri = pictureRequest?.imageUri ?: return
-        debugHelper.print("$label Picture saved at $uri")
-        updateTaskToValidating(label, uri)
-        awaitingValidation = label
-    }
-
     private fun updateTaskToValidating(label: String, uri: Uri) {
         val updatedState = gameState.find { it.label == label }
         if (updatedState == null || !gameInProgress ) {
@@ -158,53 +195,15 @@ class GameViewModel @Inject constructor(private val debugHelper: DebugHelper,
         }
     }
 
-    fun validateImage(validateRequest: ValidateRequest) {
-        if (validateRequest.imageLabel == awaitingValidation) {
-            awaitingValidation = null
-            networkScope.launch {
-                validationRepository.validateImage(validateRequest)
-            }
-        }
-    }
-
-    fun pendingImage(pictureRequest: PictureRequest) {
-        this.pictureRequest = pictureRequest
-    }
-
-    fun clearImageRequest() {
-        pictureRequest = null
-    }
-
-    fun setGameTasks(labels: Set<String>) {
-        gameState.clear()
-        buildDataList(labels).forEach {
-            gameState.add(it)
-            viewModelScope.launch {
-                notifyGameUpdate(it)
-            }
-        }
-    }
-
     @OptIn(ExperimentalTime::class)
-    fun oneSecondTimer() = flow {
+    private fun oneSecondTimer() = flow {
         while (true) {
             emit(Unit)
             delay(1.seconds)
         }
     }
 
-    fun beginGame() {
-        if (!gameInProgress) {
-            debugHelper.print("Game Starting")
-            startTimer()
-        }
-    }
-
-    fun currentState(): List<GameCardState> {
-        return gameState.toList()
-    }
-
     companion object {
-        private const val GAME_TIME_LIMIT_SECONDS = 120
+        const val GAME_TIME_LIMIT_SECONDS = 120
     }
 }
